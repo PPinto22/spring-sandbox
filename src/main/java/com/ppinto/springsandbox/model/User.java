@@ -3,6 +3,7 @@ package com.ppinto.springsandbox.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -11,7 +12,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "sandbox_user")
+@Table(name = "sandbox_users")
 public class User {
 
     @Id
@@ -21,8 +22,13 @@ public class User {
     private String name;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_role")
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Singular
     private Set<UserRole> roles;
+
+    @ElementCollection
+    @OrderColumn
+    @Singular
+    private List<Address> addresses;
 }
