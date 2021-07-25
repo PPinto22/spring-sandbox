@@ -3,15 +3,14 @@ package com.ppinto.springsandbox.model;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
 @Setter
+@Builder(toBuilder = true)
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@ToString
 @Table(name = "sandbox_users")
 public class User {
 
@@ -24,11 +23,47 @@ public class User {
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
-    @Singular
-    private Set<UserRole> roles;
+    private Set<UserRole> roles = new HashSet<>();
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @OrderColumn
-    @Singular
-    private List<Address> addresses;
+    private List<Address> addresses = new ArrayList<>();
+
+    @OneToOne(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.ALL)
+    private UserSettings settings;
+
+    public User(Long id,
+                String name,
+                Collection<UserRole> roles,
+                Collection<Address> addresses,
+                UserSettings settings) {
+        this.id = id;
+        this.name = name;
+        this.setRoles(roles);
+        this.setAddresses(addresses);
+        this.setSettings(settings);
+    }
+
+    public void setSettings(UserSettings settings) {
+        this.settings = settings;
+        if (settings != null) settings.setUser(this);
+    }
+
+    public void setRoles(Collection<UserRole> roles) {
+        if (roles == null) {
+            this.roles.clear();
+            return;
+        }
+        this.roles.retainAll(roles);
+        this.roles.addAll(roles);
+    }
+
+    public void setAddresses(Collection<Address> addresses) {
+        if (addresses == null) {
+            this.addresses.clear();
+            return;
+        }
+        this.addresses.retainAll(addresses);
+        this.addresses.addAll(addresses);
+    }
 }
